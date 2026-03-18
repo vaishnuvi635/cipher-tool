@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cipher Tool - Encryption & Decryption</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .content {
+            display: flex;
+            height: 100%;
+        }
+
+        .sidebar {
+            width: 250px;
+            background: #f8f9fa;
+            border-right: 1px solid #e0e0e0;
+            padding: 20px;
+        }
+
+        .cipher-btn {
+            width: 100%;
+            padding: 12px 15px;
+            margin-bottom: 10px;
+            border: none;
+            border-left: 4px solid transparent;
+            background: white;
+            color: #333;
+            cursor: pointer;
+            font-size: 1em;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+            text-align: left;
+        }
+
+        .cipher-btn:hover {
+            background: #e8e9ff;
+            transform: translateX(5px);
+        }
+
+        .cipher-btn.active {
+            background: #667eea;
+            color: white;
+            border-left-color: #764ba2;
+        }
+
+        .main {
+            flex: 1;
+            padding: 40px;
+            overflow-y: auto;
+        }
+
+        .cipher-section {
+            display: none;
+        }
+
+        .cipher-section.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .cipher-title {
+            font-size: 2em;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .cipher-description {
+            color: #666;
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            font-size: 1em;
+            font-family: 'Courier New', monospace;
+            transition: border-color 0.3s ease;
+        }
+
+        input[type="text"]:focus,
+        input[type="number"]:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+        button {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-encrypt {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-encrypt:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-decrypt {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .btn-decrypt:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(245, 87, 108, 0.4);
+        }
+
+        .btn-clear {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .btn-clear:hover {
+            background: #d0d0d0;
+        }
+
+        .output-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+            margin-top: 25px;
+        }
+
+        .output-label {
+            font-weight: 600;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .output-box {
+            background: white;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #667eea;
+            font-family: 'Courier New', monospace;
+            word-break: break-all;
+            min-height: 60px;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .copy-btn {
+            background: #667eea;
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+            font-size: 0.9em;
+        }
+
+        .copy-btn:hover {
+            background: #764ba2;
+        }
+
+        .info-box {
+            background: #e8f4f8;
+            border-left: 4px solid #0288d1;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            color: #01579b;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid #e0e0e0;
+                display: flex;
+                gap: 10px;
+                overflow-x: auto;
+            }
+
+            .cipher-btn {
+                flex-shrink: 0;
+                margin-bottom: 0;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .main {
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 1.8em;
+            }
+        }
+
+        .success-message {
+            background: #c8e6c9;
+            color: #2e7d32;
+            padding: 10px 15px;
+            border-radius: 5px;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .success-message.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔐 Cipher Tool</h1>
+            <p>Encrypt & Decrypt using Various Classical Cryptography Methods</p>
+        </div>
+
+        <div class="content">
+            <div class="sidebar">
+                <button class="cipher-btn active" onclick="switchCipher('caesar')">Caesar Cipher</button>
+                <button class="cipher-btn" onclick="switchCipher('vigenere')">Vigenere Cipher</button>
+                <button class="cipher-btn" onclick="switchCipher('hill')">Hill Cipher</button>
+                <button class="cipher-btn" onclick="switchCipher('railfence')">Rail Fence</button>
+                <button class="cipher-btn" onclick="switchCipher('columnar')">Columnar Transposition</button>
+            </div>
+
+            <div class="main">
+                <!-- Caesar Cipher -->
+                <div id="caesar" class="cipher-section active">
+                    <h2 class="cipher-title">Caesar Cipher</h2>
+                    <p class="cipher-description">
+                        The Caesar cipher shifts each letter by a fixed number of positions in the alphabet. For example, with a shift of 3, 'A' becomes 'D'.
+                    </p>
+                    <div class="info-box">
+                        <strong>How it works:</strong> Each letter is shifted by the same amount. Key range: 1-25
+                    </div>
+
+                    <div class="form-group">
+                        <label for="caesar-shift">Shift Key (1-25):</label>
+                        <input type="number" id="caesar-shift" min="1" max="25" value="3" placeholder="Enter shift value">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="caesar-plaintext">Plaintext:</label>
+                        <textarea id="caesar-plaintext" placeholder="Enter text to encrypt">Hello World</textarea>
+                    </div>
+
+                    <div class="button-group">
+                        <button class="btn-encrypt" onclick="caesarEncrypt()">Encrypt</button>
+                        <button class="btn-clear" onclick="caesarClear()">Clear</button>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="caesar-ciphertext">Ciphertext:</label>
+                        <textarea id="caesar-ciphertext" readonly placeholder="Encrypted text will appear here"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="caesar-decrypt-text">Decrypt:</label>
+                        <textarea id="caesar-decrypt-text" placeholder="Enter text to decrypt"></textarea>
+                    </div>
+
+                    <div class="button-group">
+                        <button class="btn-decrypt" onclick="caesarDecrypt()">Decrypt</button>
+                    </div>
+
+                    <div class="output-section">
+                        <div class="output-label">Decrypted Output:</div>
+                        <div class="output-box" id="caesar-output">-</div>
+                        <button class="copy-btn" onclick="copyToClipboard('caesar-output')">Copy Result</button>
+                    </div>
+                </div>
+
+                <!-- Vigenere Cipher -->
+                <div id="vigenere" class="cipher-section">
+                    <h2 class="cipher-title">Vigenere Cipher</h2>
+                    <p class="cipher-description">
+                        The Vigenere cipher uses a keyword to shift letters at different positions. Each letter of the keyword determines the shift for the corresponding letter in the plaintext.
+                    </p>
+                    <div class="info-box">
+                        <strong>How it works:</strong> Each letter is shifted by an amount determined by the corresponding letter in the key. Key: alphabetic characters only.
+                    </div>
+
+                    <div class="form-group">
+                        <label for="vigenere-key">Key:</label>
+                        <input type="text" id="vigenere-key" placeholder="Enter keyword (e.g., 'KEY')" value="KEY">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="vigenere-plaintext">Plaintext:</label>
+                        <textarea id="vigenere-plaintext" placeholder="Enter text to encrypt">Hello World</textarea>
+                    </div>
+
+                    <div class="button-group">
+                        <button class="btn-encrypt" onclick="vigenereEncrypt()">Encrypt</button>
+                        <button class="btn-clear" onclick="vigenereClear()">Clear</button>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="vigenere-ciphertext">Ciphertext:</label>
+                        <textarea id="vigenere-ciphertext" readonly placeholder="Encrypted text will appear here"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="vigenere-decrypt-text">Decrypt:</label>
+                        <textarea id="vigenere-decrypt-text" placeholder="Enter text to decrypt"></textarea>
+                    </div>
+
+                    <div class="button-group">
+                        <button class="btn-decrypt" onclick="vigenereDecrypt()">Decrypt</button>
+                    </div>
+
+                    <div class="output-section">
+                        <div class="output-label">Decrypted Output:</div>
+                        <div class="output-box" id="vigenere-output">-</div>
+                        <button class="copy-btn" onclick="copyToClipboard('vigenere-output')">Copy Result</button>
+                    </div>
+                </div>
+
+                <!-- Hill Cipher -->
+                <div id="hill" class="cipher-section">
+                    <h2 class="cipher-title">Hill Cipher</h2>
+                    <p class="cipher-description">
+                        The Hill cipher uses a matrix as the key to encrypt plaintext. It processes multiple letters at once using matrix multiplication modulo 26.
+                    </p>
+                    <div class="info-box">
+                        <strong>How it works:</strong> Uses 2x2 matrix for encryption. Enter 4 numbers (a,b,c,d) for the matrix [[a,b],[c,d]]. Determinant must be coprime with 26.
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="hill-a">Key Matrix a:</label>
+                            <input type="number" id="hill-a" placeholder="0-25" value="5">
+                        </div>
+                        <div class="form-group">
+                            <label for="hill-b">Key Matrix b:</label>
+                            <input type="number" id="hill-b" placeholder="0-25" value="8">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="hill-c">Key Matrix c:</label>
+                            <input type="number" id="hill-c" placeholder="0-25" value="17">
+                        </div>
+                        <div class="form-group">
+                            <label for="hill-d">Key Matrix d:</label>
+                            <input type="number" id="hill-d" placeholder="0-25" value="3">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="hill-plaintext">Plaintext (must be even length):</label>
+                        <textarea id="hill-plaintext" placeholder="Enter text (even number of characters)">HELLO</textarea>
+                    </div>
+
+                    <div class="button-group">
+                        <button class="btn-encrypt" onclick="hillEncrypt()">Encrypt</button>
+                        <button class="btn-clear" onclick="hillClear()">Clear</button>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="hill-ciphertext">Ciphertext:</label>
+                        <textarea id="hill-ciphertext" readonly placeholder="Encrypted text will appear here"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="hill-decrypt-text">Decrypt:</label>
+                        <textarea id="hill-decrypt-text" placeholder="Enter text to decrypt"></textarea>
+                    </div>
+
+                    <div class="button-group">
+                        <button class="btn-decrypt" onclick="hillDecrypt()">Decrypt</button>
+                    </div>
+
+                    <div class="output-section">
+                        <div class="output-label">Decrypted Output:</div>
+                        <div class="output-box" id="hill-output">-</div>
+                        <button class="copy-btn" onclick="copyToClipboard('hill-output')">Copy Result</button>
+                    </div>
+                </div>
+
+                <!-- Rail Fence Cipher -->
+                <div id="railfence" class="cipher-section">
+                    <h2 class="cipher-title">Rail Fence Cipher</h2>
+                    <p class="cipher-description">
+                        The Rail Fence cipher (also called Zigzag cipher) arranges the plaintext in a zigzag pattern across multiple rails, then reads it row by row to create the ciphertext.
+                    </p>
+                    <div class="info-box">
+                        <strong>How it works:</strong> Text zigzags across a specified number of rails. Higher rail count = more security.
+                    </div>
+
+                    <div class="form-group">
+                        <label for="railfence-rails">Number of Rails (2-10):</label>
+                        <input type="number" id="railfence-rails" min="2" max="10" value="3" placeholder="Enter number of rails">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="railfence-plaintext">Plaintext:</label>
+                        <textarea id="railfence-plaintext" placeholder="Enter text to encrypt">WELOVECRYPTOGRAPHY</textarea>
+                    </div>
+
+                    <div class="button-group">
+                        <button class="btn-encrypt" onclick="railfenceEncrypt()">Encrypt</button>
+                        <button class="btn-clear" onclick="railfenceClear()">Clear</button>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="railfence-ciphertext">Ciphertext:</label>
+                        <textarea id="railfence-ciphertext" readonly placeholder="Encrypted text will appear here"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="railfence-decrypt-text">Decrypt:</label>
+                        <textarea id="railfence-decrypt-text" placeholder="Enter text to decrypt"></textarea>
+                    </div>
+
+                    <div class="button-group">
+                        <button class="btn-decrypt" onclick="railfenceDecrypt()">Decrypt</button>
+                    </div>
+
+                    <div class="output-section">
+                        <div class="output-label">Decrypted Output:</div>
+                        <div class="output-box" id="railfence-output">-</div>
+                        <button class="copy-btn" onclick="copyToClipboard('railfence-output')">Copy Result</button>
+                    </div>
+                </div>
+
+                <!-- Columnar Transposition Cipher -->
+                <div id="columnar" class="cipher-section">
+                    <h2 class="cipher-title">Columnar Transposition Cipher</h2>
+                    <p class="cipher-description">
+                        The Columnar Transposition cipher rearranges plaintext by writing it in rows under a key, then reading columns in alphabetical order of the key.
+                    </p>
+                    <div class="info-box">
+                        <strong>How it works:</strong> Text is written in rows, columns are rearranged based on alphabetical order of key. Key must be unique letters.
+                    </div>
+
+                    <div class="form-group">
+                        <label for="columnar-key">Key (unique letters):</label>
+                        <input type="text" id="columnar-key" placeholder="Enter key (e.g., 'SECRET')" value="SECRET">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="columnar-plaintext">Plaintext:</label>
+                        <textarea id="columnar-plaintext" placeholder="Enter text to encrypt">COMPUTERSECURITYISIMPORTANT</textarea>
+                    </div>
+
+                    <div class="button-group">
+                        <button class="btn-encrypt" onclick="columnarEncrypt()">Encrypt</button>
+                        <button class="btn-clear" onclick="columnarClear()">Clear</button>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="columnar-ciphertext">Ciphertext:</label>
+                        <textarea id="columnar-ciphertext" readonly placeholder="Encrypted text will appear here"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="columnar-decrypt-text">Decrypt:</label>
+                        <textarea id="columnar-decrypt-text" placeholder="Enter text to decrypt"></textarea>
+                    </div>
+
+                    <div class="button-group">
+                        <button class="btn-decrypt" onclick="columnarDecrypt()">Decrypt</button>
+                    </div>
+
+                    <div class="output-section">
+                        <div class="output-label">Decrypted Output:</div>
+                        <div class="output-box" id="columnar-output">-</div>
+                        <button class="copy-btn" onclick="copyToClipboard('columnar-output')">Copy Result</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function switchCipher(cipher) {
+            // Hide all sections
+            document.querySelectorAll('.cipher-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            // Remove active class from all buttons
+            document.querySelectorAll('.cipher-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            // Show selected section
+            document.getElementById(cipher).classList.add('active');
+            // Add active class to clicked button
+            event.target.classList.add('active');
+        }
+
+        // ============ CAESAR CIPHER ============
+        function caesarEncrypt() {
+            const plaintext = document.getElementById('caesar-plaintext').value.toUpperCase();
+            const shift = parseInt(document.getElementById('caesar-shift').value);
+
+            if (!plaintext) {
+                alert('Please enter text to encrypt');
+                return;
+            }
+
+            let ciphertext = '';
+            for (let char of plaintext) {
+                if (/[A-Z]/.test(char)) {
+                    ciphertext += String.fromCharCode((char.charCodeAt(0) - 65 + shift) % 26 + 65);
+                } else {
+                    ciphertext += char;
+                }
+            }
+
+            document.getElementById('caesar-ciphertext').value = ciphertext;
+        }
+
+        function caesarDecrypt() {
+            const ciphertext = document.getElementById('caesar-decrypt-text').value.toUpperCase();
+            const shift = parseInt(document.getElementById('caesar-shift').value);
+
+            if (!ciphertext) {
+                alert('Please enter text to decrypt');
+                return;
+            }
+
+            let plaintext = '';
+            for (let char of ciphertext) {
+                if (/[A-Z]/.test(char)) {
+                    plaintext += String.fromCharCode((char.charCodeAt(0) - 65 - shift + 26) % 26 + 65);
+                } else {
+                    plaintext += char;
+                }
+            }
+
+            document.getElementById('caesar-output').textContent = plaintext;
+        }
+
+        function caesarClear() {
+            document.getElementById('caesar-plaintext').value = '';
+            document.getElementById('caesar-ciphertext').value = '';
+            document.getElementById('caesar-decrypt-text').value = '';
+            document.getElementById('caesar-output').textContent = '-';
+        }
+
+        // ============ VIGENERE CIPHER ============
+        function vigenereEncrypt() {
+            const plaintext = document.getElementById('vigenere-plaintext').value.toUpperCase();
+            const key = document.getElementById('vigenere-key').value.toUpperCase();
+
+            if (!plaintext || !key) {
+                alert('Please enter plaintext and key');
+                return;
+            }
+
+            let ciphertext = '';
+            let keyIndex = 0;
+
+            for (let char of plaintext) {
+                if (/[A-Z]/.test(char)) {
+                    const shift = key.charCodeAt(keyIndex % key.length) - 65;
+                    ciphertext += String.fromCharCode((char.charCodeAt(0) - 65 + shift) % 26 + 65);
+                    keyIndex++;
+                } else {
+                    ciphertext += char;
+                }
+            }
+
+            document.getElementById('vigenere-ciphertext').value = ciphertext;
+        }
+
+        function vigenereDecrypt() {
+            const ciphertext = document.getElementById('vigenere-decrypt-text').value.toUpperCase();
+            const key = document.getElementById('vigenere-key').value.toUpperCase();
+
+            if (!ciphertext || !key) {
+                alert('Please enter ciphertext and key');
+                return;
+            }
+
+            let plaintext = '';
+            let keyIndex = 0;
+
+            for (let char of ciphertext) {
+                if (/[A-Z]/.test(char)) {
+                    const shift = key.charCodeAt(keyIndex % key.length) - 65;
+                    plaintext += String.fromCharCode((char.charCodeAt(0) - 65 - shift + 26) % 26 + 65);
+                    keyIndex++;
+                } else {
+                    plaintext += char;
+                }
+            }
+
+            document.getElementById('vigenere-output').textContent = plaintext;
+        }
+
+        function vigenereClear() {
+            document.getElementById('vigenere-plaintext').value = '';
+            document.getElementById('vigenere-ciphertext').value = '';
+            document.getElementById('vigenere-decrypt-text').value = '';
+            document.getElementById('vigenere-output').textContent = '-';
+        }
+
+        // ============ HILL CIPHER ============
+        function gcd(a, b) {
+            return b === 0 ? a : gcd(b, a % b);
+        }
+
+        function modInverse(a, m) {
+            a = ((a % m) + m) % m;
+            for (let x = 1; x < m; x++) {
+                if ((a * x) % m === 1) return x;
+            }
+            return 1;
+        }
+
+        function hillEncrypt() {
+            const plaintext = document.getElementById('hill-plaintext').value.toUpperCase().replace(/[^A-Z]/g, '');
+            const a = parseInt(document.getElementById('hill-a').value);
+            const b = parseInt(document.getElementById('hill-b').value);
+            const c = parseInt(document.getElementById('hill-c').value);
+            const d = parseInt(document.getElementById('hill-d').value);
+
+            if (!plaintext || plaintext.length % 2 !== 0) {
+                alert('Please enter plaintext with even number of letters');
+                return;
+            }
+
+            let ciphertext = '';
+            for (let i = 0; i < plaintext.length; i += 2) {
+                const x = plaintext.charCodeAt(i) - 65;
+                const y = plaintext.charCodeAt(i + 1) - 65;
+
+                const p1 = (a * x + b * y) % 26;
+                const p2 = (c * x + d * y) % 26;
+
+                ciphertext += String.fromCharCode(p1 + 65) + String.fromCharCode(p2 + 65);
+            }
+
+            document.getElementById('hill-ciphertext').value = ciphertext;
+        }
+
+        function hillDecrypt() {
+            const ciphertext = document.getElementById('hill-decrypt-text').value.toUpperCase().replace(/[^A-Z]/g, '');
+            const a = parseInt(document.getElementById('hill-a').value);
+            const b = parseInt(document.getElementById('hill-b').value);
+            const c = parseInt(document.getElementById('hill-c').value);
+            const d = parseInt(document.getElementById('hill-d').value);
+
+            if (!ciphertext || ciphertext.length % 2 !== 0) {
+                alert('Please enter ciphertext with even number of letters');
+                return;
+            }
+
+            const det = (a * d - b * c) % 26;
+            const detInv = modInverse(det, 26);
+            const a_inv = (d * detInv) % 26;
+            const b_inv = (-b * detInv % 26 + 26) % 26;
+            const c_inv = (-c * detInv % 26 + 26) % 26;
+            const d_inv = (a * detInv) % 26;
+
+            let plaintext = '';
+            for (let i = 0; i < ciphertext.length; i += 2) {
+                const y1 = ciphertext.charCodeAt(i) - 65;
+                const y2 = ciphertext.charCodeAt(i + 1) - 65;
+
+                const x1 = (a_inv * y1 + b_inv * y2) % 26;
+                const x2 = (c_inv * y1 + d_inv * y2) % 26;
+
+                plaintext += String.fromCharCode(x1 + 65) + String.fromCharCode(x2 + 65);
+            }
+
+            document.getElementById('hill-output').textContent = plaintext;
+        }
+
+        function hillClear() {
+            document.getElementById('hill-plaintext').value = '';
+            document.getElementById('hill-ciphertext').value = '';
+            document.getElementById('hill-decrypt-text').value = '';
+            document.getElementById('hill-output').textContent = '-';
+        }
+
+        // ============ RAIL FENCE CIPHER ============
+        function railfenceEncrypt() {
+            const plaintext = document.getElementById('railfence-plaintext').value.toUpperCase().replace(/[^A-Z]/g, '');
+            const rails = parseInt(document.getElementById('railfence-rails').value);
+
+            if (!plaintext || rails < 2) {
+                alert('Enter valid text and number of rails');
+                return;
+            }
+
+            const fence = Array.from({ length: rails }, () => []);
+            let rail = 0;
+            let direction = 1;
+
+            for (let char of plaintext) {
+                fence[rail].push(char);
+                rail += direction;
+
+                if (rail === 0 || rail === rails - 1) {
+                    direction *= -1;
+                }
+            }
+
+            const ciphertext = fence.flat().join('');
+            document.getElementById('railfence-ciphertext').value = ciphertext;
+        }
+
+        function railfenceDecrypt() {
+            const ciphertext = document.getElementById('railfence-decrypt-text').value.toUpperCase().replace(/[^A-Z]/g, '');
+            const rails = parseInt(document.getElementById('railfence-rails').value);
+
+            if (!ciphertext || rails < 2) {
+                alert('Enter valid ciphertext and number of rails');
+                return;
+            }
+
+            const len = ciphertext.length;
+            const fence = Array.from({ length: rails }, () => []);
+            let rail = 0;
+            let direction = 1;
+            const indices = [];
+
+            for (let i = 0; i < len; i++) {
+                indices.push(rail);
+                rail += direction;
+                if (rail === 0 || rail === rails - 1) {
+                    direction *= -1;
+                }
+            }
+
+            let index = 0;
+            for (let r = 0; r < rails; r++) {
+                const count = indices.filter(x => x === r).length;
+                for (let i = 0; i < count; i++) {
+                    fence[r].push(ciphertext[index++]);
+                }
+            }
+
+            let plaintext = '';
+            rail = 0;
+            direction = 1;
+            const fenceIndex = Array.from({ length: rails }, () => 0);
+
+            for (let i = 0; i < len; i++) {
+                plaintext += fence[rail][fenceIndex[rail]++];
+                rail += direction;
+                if (rail === 0 || rail === rails - 1) {
+                    direction *= -1;
+                }
+            }
+
+            document.getElementById('railfence-output').textContent = plaintext;
+        }
+
+        function railfenceClear() {
+            document.getElementById('railfence-plaintext').value = '';
+            document.getElementById('railfence-ciphertext').value = '';
+            document.getElementById('railfence-decrypt-text').value = '';
+            document.getElementById('railfence-output').textContent = '-';
+        }
+
+        // ============ COLUMNAR TRANSPOSITION CIPHER ============
+        function columnarEncrypt() {
+            const plaintext = document.getElementById('columnar-plaintext').value.toUpperCase().replace(/[^A-Z]/g, '');
+            const key = document.getElementById('columnar-key').value.toUpperCase();
+
+            if (!plaintext || !key) {
+                alert('Enter plaintext and key');
+                return;
+            }
+
+            const cols = key.length;
+            const rows = Math.ceil(plaintext.length / cols);
+            const grid = [];
+
+            // Create grid
+            let index = 0;
+            for (let r = 0; r < rows; r++) {
+                grid[r] = [];
+                for (let c = 0; c < cols; c++) {
+                    grid[r][c] = index < plaintext.length ? plaintext[index++] : 'X';
+                }
+            }
+
+            // Create order based on key
+            const order = Array.from({ length: cols }, (_, i) => ({ char: key[i], index: i }))
+                .sort((a, b) => a.char.localeCompare(b.char))
+                .map(x => x.index);
+
+            // Read columns in order
+            let ciphertext = '';
+            for (let i = 0; i < order.length; i++) {
+                const col = order[i];
+                for (let r = 0; r < rows; r++) {
+                    ciphertext += grid[r][col];
+                }
+            }
+
+            document.getElementById('columnar-ciphertext').value = ciphertext;
+        }
+
+        function columnarDecrypt() {
+            const ciphertext = document.getElementById('columnar-decrypt-text').value.toUpperCase().replace(/[^A-Z]/g, '');
+            const key = document.getElementById('columnar-key').value.toUpperCase();
+
+            if (!ciphertext || !key) {
+                alert('Enter ciphertext and key');
+                return;
+            }
+
+            const cols = key.length;
+            const rows = Math.ceil(ciphertext.length / cols);
+
+            // Create order based on key
+            const order = Array.from({ length: cols }, (_, i) => ({ char: key[i], index: i }))
+                .sort((a, b) => a.char.localeCompare(b.char))
+                .map(x => x.index);
+
+            const grid = Array.from({ length: rows }, () => Array(cols));
+            let index = 0;
+
+            // Fill grid column by column in sorted order
+            for (let i = 0; i < order.length; i++) {
+                const col = order[i];
+                for (let r = 0; r < rows; r++) {
+                    if (index < ciphertext.length) {
+                        grid[r][col] = ciphertext[index++];
+                    }
+                }
+            }
+
+            // Read row by row and remove padding
+            let plaintext = '';
+            for (let r = 0; r < rows; r++) {
+                for (let c = 0; c < cols; c++) {
+                    if (grid[r][c]) {
+                        plaintext += grid[r][c];
+                    }
+                }
+            }
+
+            plaintext = plaintext.replace(/X+$/, '');
+            document.getElementById('columnar-output').textContent = plaintext;
+        }
+
+        function columnarClear() {
+            document.getElementById('columnar-plaintext').value = '';
+            document.getElementById('columnar-ciphertext').value = '';
+            document.getElementById('columnar-decrypt-text').value = '';
+            document.getElementById('columnar-output').textContent = '-';
+        }
+
+        // ============ UTILITY FUNCTIONS ============
+        function copyToClipboard(elementId) {
+            const element = document.getElementById(elementId);
+            const text = element.textContent;
+
+            if (text === '-') {
+                alert('Nothing to copy');
+                return;
+            }
+
+            navigator.clipboard.writeText(text).then(() => {
+                alert('Copied to clipboard!');
+            });
+        }
+    </script>
+</body>
+</html>
